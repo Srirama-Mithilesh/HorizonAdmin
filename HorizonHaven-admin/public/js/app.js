@@ -102,7 +102,7 @@ async function loadProperties() {
                         </div>
                         
                         <div class="action-buttons">
-                            <a href="/property-form?id=${p.id}" class="btn btn-outline btn-sm">Edit Details</a>
+                            <button onclick="switchToFormView(${p.id})" class="btn btn-outline btn-sm">Edit Details</button>
                             <button onclick="deleteProperty(${p.id})" class="btn btn-danger-subtle btn-sm">Remove</button>
                         </div>
                     </div>
@@ -188,7 +188,8 @@ async function initForm() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(jsonData)
             });
-            window.location.href = '/properties';
+            loadProperties();
+            switchToListView();
         } catch(e) {
             alert("Error saving property");
         }
