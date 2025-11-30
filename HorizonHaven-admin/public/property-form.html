@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Property | Horizon Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="brand">Horizon<span>Admin</span></div>
+        <div class="nav">
+            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/properties" class="nav-link active">Properties</a>
+            <a href="/bookings" class="nav-link">Bookings</a>
+        </div>
+    </nav>
+
+    <main class="main">
+        <header class="header">
+            <h1 id="form-title">Add Property</h1>
+            <a href="/properties" class="btn btn-outline">Cancel</a>
+        </header>
+
+        <form id="propertyForm" class="form-container">
+            <input type="hidden" id="propId" name="id" value="0">
+            
+            <div class="form-group">
+                <label>Property Name</label>
+                <input type="text" name="name" id="name" class="form-control" required placeholder="e.g. Grand Horizon Hotel">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" name="location" id="location" class="form-control" required placeholder="City, State">
+                </div>
+                <div class="form-group">
+                    <label>Price Range</label>
+                    <input type="text" name="priceRange" id="priceRange" class="form-control" placeholder="₹5,000 - ₹10,000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="description" class="form-control" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="text" name="imageUrl" id="imageUrl" class="form-control" placeholder="https://...">
+            </div>
+
+            <div class="form-group">
+                <label>Room Types</label>
+                <div id="rooms-container" class="room-builder">
+                    <!-- Dynamic Rooms -->
+                </div>
+                <button type="button" class="btn btn-outline btn-sm" onclick="addRoomField()">+ Add Room Type</button>
+            </div>
+
+            <div style="margin-top: 32px; border-top: 1px solid #E5E7EB; padding-top: 24px; text-align: right;">
+                <button type="submit" class="btn btn-primary">Save Property</button>
+            </div>
+        </form>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', initForm);
+    </script>
+</body>
+</html>

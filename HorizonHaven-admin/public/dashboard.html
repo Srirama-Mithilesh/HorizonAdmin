@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HorizonHaven</title>
+  <link rel="stylesheet" href="./css/dashboard.css" />
+  <link rel="stylesheet" href="./css/navbar.css" />
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="dashboard.html" class="logo">Horizon<span>Haven</span></a>
+
+    <!-- Auth area: JS will replace content here when user is logged in -->
+    <div class="nav-links" id="auth-area">
+      <!-- Default guest state -->
+      <a href="listing.html">List your property</a>
+      <button class="login-btn" onclick="window.location.href='login.html'">
+        Log in / Sign up
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <img src="hero.jpg" class="hero-bg" alt="Background" />
+    <div class="hero-content">
+      <h1>Discover India's Finest Stays</h1>
+      <p>From royal palaces in Rajasthan to serene backwaters in Kerala.</p>
+    </div>
+
+    <!-- Search Box -->
+    <div class="search-box">
+      <div class="field">
+        <label>Destination</label>
+        <input
+          id="destination-input"
+          type="text"
+          placeholder="Where are you going?"
+        />
+      </div>
+      <div class="field">
+        <label>Check-in</label>
+        <input id="checkin-input" type="date" />
+      </div>
+      <div class="field">
+        <label>Check-out</label>
+        <input id="checkout-input" type="date" />
+      </div>
+      <div class="field">
+        <label>Guests</label>
+        <select id="guests-select">
+          <option value="1">1 Guest</option>
+          <option value="2">2 Guests</option>
+          <option value="3">3 Guests</option>
+          <option value="4">4 Guests</option>
+        </select>
+      </div>
+      <button class="search-btn" id="search-btn">Search</button>
+    </div>
+  </header>
+
+  <!-- Popular Destinations -->
+  <section class="destinations" id="Destination">
+    <h2>Popular Destinations</h2>
+    <!-- Cards will be injected here by JS -->
+  </section>
+
+  <!-- Search Results (dynamic from backend) -->
+  <section class="results" id="results-section">
+    <h2>Search Results</h2>
+    <p class="results-subtitle" id="results-subtitle">
+      Use the search box above to find stays.
+    </p>
+    <div class="results-grid" id="results-grid"></div>
+  </section>
+
+  <script src="./js/dashboard.js"></script>
+  <script src="./js/navbar.js"></script>
+</body>
+</html>

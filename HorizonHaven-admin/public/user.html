@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | HorizonHaven</title>
+    <link rel="stylesheet" href="css/user.css">
+    <link rel="stylesheet" href="./css/navbar.css" />
+</head>
+<body>
+    
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="dashboard.html" class="logo">Horizon<span>Haven</span></a>
+
+        <!-- Auth area: JS will replace content here when user is logged in -->
+        <div class="nav-links" id="auth-area">
+        <!-- Default guest state -->
+        <a href="#">List your property</a>
+        <button class="login-btn" onclick="window.location.href='login.html'">
+            Log in / Sign up
+        </button>
+        </div>
+    </nav>
+
+    <!-- User Profile Section -->
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-img">
+                <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="User Image">
+            </div>
+
+            <div class="user-info" id="user-info">
+                <button class="edit-btn" id="editProfileBtn">Edit Profile</button>
+            </div>
+
+            <!-- Edit Form (hidden initially) -->
+            <div id="edit-form" style="display:none;">
+                <input type="text" id="edit-name" placeholder="Enter your name" />
+                <input type="email" id="edit-email" placeholder="Enter email" />
+                <button id="saveProfileBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+<div class="search-container">
+    <input type="text" id="destination-input" placeholder="Enter destination" />
+    <select id="guests-select">
+        <option value="1">1 Guest</option>
+        <option value="2">2 Guests</option>
+        <option value="3">3 Guests</option>
+        <option value="4">4 Guests</option>
+    </select>
+    <button id="search-btn">Search</button>
+</div>
+
+<!-- Results Section -->
+<div id="results-section">
+    <h2 id="results-subtitle"></h2>
+    <div id="results-grid"></div>
+</div>
+
+<!-- Popular Destinations Section -->
+<div id="Destination"></div>
+
+    <!-- Booking History Section -->
+    <div class="section">
+        <h2>Your Recent Bookings</h2>
+        <div class="booking-card">
+            <p><strong>🏨 Hotel:</strong> The Royal Palace, Jaipur</p>
+            <p><strong>📅 Stay:</strong> 12 Feb 2025 - 15 Feb 2025</p>
+            <p><strong>👤 Guests:</strong> 2 Adults</p>
+            <button class="view-btn">View Details</button>
+        </div>
+        <div class="booking-card">
+            <p><strong>🏨 Hotel:</strong> Lakeside Resort, Kerala</p>
+            <p><strong>📅 Stay:</strong> 20 Mar 2025 - 23 Mar 2025</p>
+            <p><strong>👤 Guests:</strong> 3 Adults</p>
+            <button class="view-btn">View Details</button>
+        </div>
+    </div>
+
+    <script src="js/navbar.js"></script>
+    <script src="js/user.js"></script>
+</body>
+</html>

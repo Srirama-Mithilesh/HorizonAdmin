@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bookings | Horizon Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="brand">Horizon<span>Admin</span></div>
+        <div class="nav">
+            <a href="/" class="nav-link">Dashboard</a>
+            <a href="/properties" class="nav-link">Properties</a>
+            <a href="/bookings" class="nav-link active">Bookings</a>
+        </div>
+        <div class="logout"><a href="#">Log Out</a></div>
+    </nav>
+
+    <main class="main">
+        <header class="header">
+            <h1>All Reservations</h1>
+            <button class="btn btn-outline">Export CSV</button>
+        </header>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Guest Name</th>
+                        <th>Property</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="bookings-list">
+                    <!-- JS Injected -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', loadBookings);
+    </script>
+</body>
+</html>

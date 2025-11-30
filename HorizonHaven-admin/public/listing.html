@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Your Property - Horizon Haven</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/listing.css">
+</head>
+<body>
+
+    <!-- SECTION 1: LANDING & SELECTION -->
+    <div id="landing-section" class="view-section active">
+        <div class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-content">
+                <h1>List Your Property on <span>Horizon</span></h1>
+                <p>Join our global network of hosts. Choose the path that fits your hosting style.</p>
+            </div>
+            <button class="close-btn" onclick="window.location.href='dashboard.html'">Close ✕</button>
+        </div>
+
+        <div class="selection-container">
+            <div class="cards-grid">
+                <!-- Casual Host Card -->
+                <div class="card casual-card" onclick="switchView('casual')">
+                    <div class="card-accent casual-accent"></div>
+                    <div class="icon-box casual-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    </div>
+                    <h3>Casual Host</h3>
+                    <p>I have a spare room, apartment, or vacation home I'd like to rent out occasionally for side income.</p>
+                    <ul class="features-list">
+                        <li><span class="check casual-check">✓</span> Quick 5-minute setup</li>
+                        <li><span class="check casual-check">✓</span> Flexible availability calendar</li>
+                        <li><span class="check casual-check">✓</span> Secure guest verification</li>
+                    </ul>
+                    <span class="cta-link casual-link">Start Listing &rarr;</span>
+                </div>
+
+                <!-- Professional Host Card -->
+                <div class="card professional-card" onclick="switchView('professional')">
+                    <div class="card-accent professional-accent"></div>
+                    <div class="icon-box professional-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                    </div>
+                    <h3>Hotel Partner</h3>
+                    <p>I represent a hotel, resort, or manage a portfolio of properties professionally.</p>
+                    <ul class="features-list">
+                        <li><span class="check professional-check">✓</span> Advanced inventory API</li>
+                        <li><span class="check professional-check">✓</span> Dedicated account manager</li>
+                        <li><span class="check professional-check">✓</span> Yield management tools</li>
+                    </ul>
+                    <span class="cta-link professional-link">Apply Now &rarr;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 2: CASUAL FORM -->
+    <div id="casual-section" class="view-section split-layout casual-theme">
+        <div class="split-left casual-bg">
+            <div class="overlay"></div>
+            <div class="content-wrapper-c">
+                <button class="back-link" onclick="switchView('landing')" style="color: rgba(0,0,0,0.8);">&larr; Back</button>
+                <h2>Earn Money Hosting Your Space</h2>
+                <p>Turn your extra space into extra income. It's simple, secure, and fully flexible.</p>
+                
+                <div class="testimonial">
+                    <div class="avatar">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop" alt="User">
+                    </div>
+                    <div class="text">
+                        <strong>"Hosting allowed me to pay for my dream vacation!"</strong>
+                        <span>- David, Host since 2021</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="split-right">
+            <div class="mobile-nav">
+                <button onclick="switchView('landing')">&larr; Back to selection</button>
+            </div>
+            <div class="form-container">
+                <h2>Create Your Listing</h2>
+                <p class="subtitle">Tell us a little about your place.</p>
+                
+                <form id="casualForm" onsubmit="handleSubmit(event, 'casual')">
+                    <input type="hidden" name="hostType" value="casual">
+                    <div class="form-group">
+                        <label>Listing Title</label>
+                        <input type="text" name="title" required placeholder="e.g. Sunny Loft in Downtown">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Property Type</label>
+                            <div class="select-wrapper">
+                                <select name="type">
+                                    <option>Apartment</option>
+                                    <option>Entire House</option>
+                                    <option>Guest Suite</option>
+                                    <option>Vacation Cabin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Price per Night</label>
+                            <div class="input-icon-wrapper">
+                                <span class="currency">$</span>
+                                <input type="number" name="price" required placeholder="100" class="pl-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="4" placeholder="What makes your place special?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Photos</label>
+                        <div class="file-upload casual-upload">
+                            <div class="icon">📷</div>
+                            <p>Click to upload photos</p>
+                            <span>Add at least 3 photos</span>
+                            <input type="file" multiple class="hidden-file">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn casual-btn">Publish Listing</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: PROFESSIONAL FORM -->
+    <div id="professional-section" class="view-section split-layout professional-theme">
+        <div class="split-left professional-bg">
+            <div class="overlay"></div>
+            <div class="content-wrapper-p">
+                <button class="back-link" onclick="switchView('landing')">&larr; Back</button>
+                <h2>Elevate Your Hotel's Online Presence</h2>
+                <p>Join thousands of luxury hotels growing their bookings with Horizon's premium partner network.</p>
+                
+                <div class="features-box">
+                    <div class="feature-item">
+                        <div class="f-icon">🌐</div>
+                        <div>
+                            <h4>Global Reach</h4>
+                            <span>Access travelers from over 190 countries instantly.</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="f-icon">📊</div>
+                        <div>
+                            <h4>Analytics Dashboard</h4>
+                            <span>Real-time insights on revenue and occupancy rates.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="split-right">
+            <div class="mobile-nav">
+                <button onclick="switchView('landing')">&larr; Back to selection</button>
+            </div>
+            <div class="form-container">
+                <h2>Partner Application</h2>
+                <p class="subtitle">Complete the form below to register your property.</p>
+                
+                <form id="proForm" onsubmit="handleSubmit(event, 'professional')">
+                    <input type="hidden" name="hostType" value="professional">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Business Name</label>
+                            <input type="text" name="businessName" required placeholder="e.g. Grand Horizon Hotel">
+                        </div>
+                        <div class="form-group">
+                            <label>Registration No.</label>
+                            <input type="text" name="regNo" required placeholder="Tax ID / Reg #">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Property Address</label>
+                        <input type="text" name="address" required placeholder="Street, City, Country">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Total Room Count</label>
+                            <input type="number" name="roomCount" required placeholder="e.g. 150">
+                        </div>
+                        <div class="form-group">
+                            <label>Official Website</label>
+                            <input type="url" name="website" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Verification Documents</label>
+                        <div class="file-upload professional-upload">
+                            <div class="icon">📄</div>
+                            <p>Click to upload business license</p>
+                            <span>PDF, JPG, or PNG (Max 5MB)</span>
+                            <input type="file" class="hidden-file">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn professional-btn">Submit Application</button>
+                    <p class="terms">By submitting, you agree to Horizon's <a href="#">Partner Terms</a>.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 4: SUCCESS -->
+    <div id="success-section" class="view-section">
+        <div class="success-container">
+            <div class="success-card">
+                <div class="top-bar-gradient"></div>
+                <div class="success-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <h2>Application Received!</h2>
+                <p id="success-message">Thank you. Your listing is being processed.</p>
+                <button class="dashboard-btn" onclick="window.location.href='/dashboard'">Go to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/client.js"></script>
+</body>
+</html>
