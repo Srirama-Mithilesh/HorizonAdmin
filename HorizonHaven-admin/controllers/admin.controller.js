@@ -1,15 +1,3 @@
-
-const express = require('express');
-const path = require('path');
-const app = express();
-const PORT = 3000;
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
-
-// --- MOCK DATABASE ---
 let properties = [
     {
         id: 1,
@@ -42,80 +30,58 @@ let bookings = [
     { id: 'BK-1003', propertyId: 1, guest: 'Rahul Dravid', date: '2024-05-20', amount: 28000, status: 'Confirmed' }
 ];
 
-// --- API ROUTES ---
-
-// Get Stats
-app.get('/api/stats', (req, res) => {
+export const getStats = (req, res) => {
     const totalRevenue = bookings
         .filter(b => b.status === 'Confirmed')
         .reduce((sum, b) => sum + b.amount, 0);
-    
+
     res.json({
         revenue: totalRevenue,
         activeBookings: bookings.filter(b => b.status === 'Confirmed').length,
         totalProperties: properties.length
     });
-});
+};
 
-// Get All Properties
-app.get('/api/properties', (req, res) => {
+export const getAllProperties = (req, res) => {
     res.json(properties);
-});
+};
 
-// Get Single Property
-app.get('/api/properties/:id', (req, res) => {
+export const getPropertyById = (req, res) => {
     const id = parseInt(req.params.id);
     const prop = properties.find(p => p.id === id);
     if (prop) res.json(prop);
     else res.status(404).json({ error: 'Not found' });
-});
+};
 
-// Create or Update Property
-app.post('/api/properties', (req, res) => {
+export const createOrUpdateProperty = (req, res) => {
     const data = req.body;
-    
-    // Parse rooms from JSON string if sent as form data
+
     if (typeof data.rooms === 'string') {
         try { data.rooms = JSON.parse(data.rooms); } catch(e) { data.rooms = []; }
     }
 
     if (data.id && data.id != 0) {
-        // Edit
         const index = properties.findIndex(p => p.id == data.id);
         if (index !== -1) {
             properties[index] = { ...properties[index], ...data, id: parseInt(data.id) };
         }
     } else {
-        // Create
         const newId = properties.length > 0 ? Math.max(...properties.map(p => p.id)) + 1 : 1;
         properties.push({ ...data, id: newId });
     }
     res.json({ success: true });
-});
+};
 
-// Delete Property
-app.delete('/api/properties/:id', (req, res) => {
+export const deleteProperty = (req, res) => {
     const id = parseInt(req.params.id);
     properties = properties.filter(p => p.id !== id);
     res.json({ success: true });
-});
+};
 
-// Get Bookings
-app.get('/api/bookings', (req, res) => {
-    // Enrich with property names
+export const getAllBookings = (req, res) => {
     const enriched = bookings.map(b => ({
         ...b,
         propertyName: properties.find(p => p.id === b.propertyId)?.name || 'Unknown Property'
     }));
     res.json(enriched);
-});
-
-// --- PAGE ROUTES ---
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/properties', (req, res) => res.sendFile(path.join(__dirname, 'public', 'properties.html')));
-app.get('/bookings', (req, res) => res.sendFile(path.join(__dirname, 'public', 'bookings.html')));
-app.get('/property-form', (req, res) => res.sendFile(path.join(__dirname, 'public', 'property-form.html')));
-
-app.listen(PORT, () => {
-    console.log(`Admin Dashboard running at http://localhost:${PORT}`);
-});
+};

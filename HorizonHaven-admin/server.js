@@ -21,6 +21,7 @@ function authenticateToken(req, res, next) {
 
 import propertiesRoutes from './routes/properties.routes.js';
 import authRoutes from "./routes/auth.routes.js"
+import adminRoutes from './routes/admin.routes.js';
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Properties/search routes
 app.use('/api', authRoutes);
 app.use('/api', propertiesRoutes);
+app.use('/api', adminRoutes);
 
 // --- Page routes (you can also just open the HTML files directly) ---
 app.get('/login', (req, res) => {
@@ -55,6 +57,14 @@ app.get('/signup', (req, res) => {
 
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+app.get('/properties', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'properties.html'));
+});
+
+app.get('/bookings', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'bookings.html'));
 });
 
 // Default route -> dashboard
