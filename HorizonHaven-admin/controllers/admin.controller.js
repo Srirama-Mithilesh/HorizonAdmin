@@ -1,87 +1,354 @@
-let properties = [
-    {
-        id: 1,
-        name: 'The Royal Lake Palace',
-        location: 'Udaipur, Rajasthan',
-        priceRange: '₹25,000 - ₹80,000',
-        imageUrl: 'https://images.unsplash.com/photo-1585543805890-6051f7829f98?q=80&w=800&auto=format&fit=crop',
-        description: 'Floating on the serene waters of Lake Pichola, this white marble palace offers a taste of royal heritage.',
-        rooms: [
-            { type: 'Lake View', price: 28000, capacity: 2 },
-            { type: 'Royal Suite', price: 55000, capacity: 2 }
-        ]
-    },
-    {
-        id: 2,
-        name: 'Goa Beachfront Resort',
-        location: 'Candolim, Goa',
-        priceRange: '₹12,000 - ₹30,000',
-        imageUrl: 'https://images.unsplash.com/photo-1571896349842-68cfd31b17b2?q=80&w=800&auto=format&fit=crop',
-        description: 'Step directly onto the golden sands of Candolim. Features a massive pool and beach shack.',
-        rooms: [
-            { type: 'Garden Villa', price: 15000, capacity: 4 }
-        ]
+import { supabase } from '../config/supabase.js';
+import { cacheGet, cacheSet, cacheDelete, cacheDeletePattern } from '../utils/cache.js';
+
+export const getStats = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    if (!adminId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const cacheKey = `admin:stats:${adminId}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json(cached);
+
+    const { data: hotels, error: hotelsError } = await supabase
+      .from('hotels')
+      .select('id')
+      .eq('owner_id', adminId);
+
+    if (hotelsError) throw hotelsError;
+
+    const hotelIds = hotels?.map(h => h.id) || [];
+
+    if (hotelIds.length === 0) {
+      const stats = { revenue: 0, activeBookings: 0, totalProperties: 0 };
+      await cacheSet(cacheKey, stats, 300);
+      return res.json(stats);
     }
-];
 
-let bookings = [
-    { id: 'BK-1001', propertyId: 1, guest: 'Arjun Kumar', date: '2024-05-12', amount: 84000, status: 'Confirmed' },
-    { id: 'BK-1002', propertyId: 2, guest: 'Sarah Jenkins', date: '2024-06-01', amount: 45000, status: 'Pending' },
-    { id: 'BK-1003', propertyId: 1, guest: 'Rahul Dravid', date: '2024-05-20', amount: 28000, status: 'Confirmed' }
-];
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select('id, total_price, status, room_id')
+      .in('room_id',
+        (await supabase.from('rooms').select('id').in('hotel_id', hotelIds)).data?.map(r => r.id) || []
+      );
 
-export const getStats = (req, res) => {
-    const totalRevenue = bookings
-        .filter(b => b.status === 'Confirmed')
-        .reduce((sum, b) => sum + b.amount, 0);
+    if (bookingsError) throw bookingsError;
 
-    res.json({
-        revenue: totalRevenue,
-        activeBookings: bookings.filter(b => b.status === 'Confirmed').length,
-        totalProperties: properties.length
+    const totalRevenue = (bookings || [])
+      .filter(b => b.status === 'confirmed')
+      .reduce((sum, b) => parseFloat(b.total_price || 0) + sum, 0);
+
+    const activeBookings = (bookings || []).filter(b => b.status === 'confirmed').length;
+    const totalProperties = hotels.length;
+
+    const stats = {
+      revenue: Math.round(totalRevenue),
+      activeBookings,
+      totalProperties
+    };
+
+    await cacheSet(cacheKey, stats, 300);
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+};
+
+export const getAllProperties = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    if (!adminId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const cacheKey = `admin:properties:${adminId}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json(cached);
+
+    const { data: hotels, error: hotelsError } = await supabase
+      .from('hotels')
+      .select('id, name, city, address, image')
+      .eq('owner_id', adminId);
+
+    if (hotelsError) throw hotelsError;
+
+    const hotelIds = hotels?.map(h => h.id) || [];
+    let allRooms = [];
+
+    if (hotelIds.length > 0) {
+      const { data: rooms, error: roomsError } = await supabase
+        .from('rooms')
+        .select('id, hotel_id, room_type, price_per_night, max_guests, is_available, images')
+        .in('hotel_id', hotelIds);
+
+      if (roomsError) throw roomsError;
+      allRooms = rooms || [];
+    }
+
+    const properties = hotels.map(hotel => {
+      const hotelRooms = allRooms.filter(r => r.hotel_id === hotel.id);
+      return {
+        id: hotel.id,
+        name: hotel.name,
+        location: hotel.city,
+        address: hotel.address,
+        imageUrl: hotel.image,
+        description: `${hotelRooms.length} rooms available`,
+        rooms: hotelRooms.map(r => ({
+          id: r.id,
+          type: r.room_type,
+          price: r.price_per_night,
+          capacity: r.max_guests,
+          available: r.is_available
+        }))
+      };
     });
-};
 
-export const getAllProperties = (req, res) => {
+    await cacheSet(cacheKey, properties, 300);
     res.json(properties);
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    res.status(500).json({ error: 'Failed to fetch properties' });
+  }
 };
 
-export const getPropertyById = (req, res) => {
-    const id = parseInt(req.params.id);
-    const prop = properties.find(p => p.id === id);
-    if (prop) res.json(prop);
-    else res.status(404).json({ error: 'Not found' });
-};
+export const getPropertyById = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    const hotelId = req.params.id;
 
-export const createOrUpdateProperty = (req, res) => {
-    const data = req.body;
+    if (!adminId) return res.status(401).json({ error: 'Unauthorized' });
 
-    if (typeof data.rooms === 'string') {
-        try { data.rooms = JSON.parse(data.rooms); } catch(e) { data.rooms = []; }
+    const cacheKey = `admin:property:${hotelId}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json(cached);
+
+    const { data: hotel, error: hotelError } = await supabase
+      .from('hotels')
+      .select('id, name, city, address, image, owner_id')
+      .eq('id', hotelId)
+      .maybeSingle();
+
+    if (hotelError) throw hotelError;
+    if (!hotel || hotel.owner_id !== adminId) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
-    if (data.id && data.id != 0) {
-        const index = properties.findIndex(p => p.id == data.id);
-        if (index !== -1) {
-            properties[index] = { ...properties[index], ...data, id: parseInt(data.id) };
-        }
+    const { data: rooms, error: roomsError } = await supabase
+      .from('rooms')
+      .select('id, hotel_id, room_type, price_per_night, max_guests, is_available, images')
+      .eq('hotel_id', hotelId);
+
+    if (roomsError) throw roomsError;
+
+    const property = {
+      id: hotel.id,
+      name: hotel.name,
+      location: hotel.city,
+      address: hotel.address,
+      imageUrl: hotel.image,
+      rooms: (rooms || []).map(r => ({
+        id: r.id,
+        type: r.room_type,
+        price: r.price_per_night,
+        capacity: r.max_guests,
+        available: r.is_available
+      }))
+    };
+
+    await cacheSet(cacheKey, property, 300);
+    res.json(property);
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    res.status(500).json({ error: 'Failed to fetch property' });
+  }
+};
+
+export const createOrUpdateProperty = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    if (!adminId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id, name, location, address, imageUrl, description, rooms } = req.body;
+
+    let roomsData = rooms;
+    if (typeof rooms === 'string') {
+      try { roomsData = JSON.parse(rooms); } catch(e) { roomsData = []; }
+    }
+
+    if (id && id !== '0') {
+      const { data: hotel, error: checkError } = await supabase
+        .from('hotels')
+        .select('id, owner_id')
+        .eq('id', id)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+      if (!hotel || hotel.owner_id !== adminId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+
+      const { error: updateError } = await supabase
+        .from('hotels')
+        .update({
+          name,
+          city: location,
+          address,
+          image: imageUrl
+        })
+        .eq('id', id);
+
+      if (updateError) throw updateError;
+
+      await cacheDeletePattern(`admin:property:${id}*`);
+      await cacheDeletePattern(`admin:properties:${adminId}*`);
+      await cacheDeletePattern(`admin:stats:${adminId}*`);
+
+      res.json({ success: true, id });
     } else {
-        const newId = properties.length > 0 ? Math.max(...properties.map(p => p.id)) + 1 : 1;
-        properties.push({ ...data, id: newId });
+      const { data: newHotel, error: createError } = await supabase
+        .from('hotels')
+        .insert({
+          name,
+          city: location,
+          address,
+          image: imageUrl,
+          owner_id: adminId
+        })
+        .select('id')
+        .single();
+
+      if (createError) throw createError;
+
+      if (roomsData && roomsData.length > 0) {
+        const roomsToInsert = roomsData.map(r => ({
+          hotel_id: newHotel.id,
+          room_type: r.type,
+          price_per_night: r.price,
+          max_guests: r.capacity,
+          is_available: true
+        }));
+
+        const { error: roomsError } = await supabase
+          .from('rooms')
+          .insert(roomsToInsert);
+
+        if (roomsError) throw roomsError;
+      }
+
+      await cacheDeletePattern(`admin:properties:${adminId}*`);
+      await cacheDeletePattern(`admin:stats:${adminId}*`);
+
+      res.json({ success: true, id: newHotel.id });
     }
-    res.json({ success: true });
+  } catch (error) {
+    console.error('Error creating/updating property:', error);
+    res.status(500).json({ error: 'Failed to save property' });
+  }
 };
 
-export const deleteProperty = (req, res) => {
-    const id = parseInt(req.params.id);
-    properties = properties.filter(p => p.id !== id);
+export const deleteProperty = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    const hotelId = req.params.id;
+
+    if (!adminId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { data: hotel, error: checkError } = await supabase
+      .from('hotels')
+      .select('id, owner_id')
+      .eq('id', hotelId)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+    if (!hotel || hotel.owner_id !== adminId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const { error: deleteError } = await supabase
+      .from('hotels')
+      .delete()
+      .eq('id', hotelId);
+
+    if (deleteError) throw deleteError;
+
+    await cacheDelete(`admin:property:${hotelId}`);
+    await cacheDeletePattern(`admin:properties:${adminId}*`);
+    await cacheDeletePattern(`admin:stats:${adminId}*`);
+
     res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    res.status(500).json({ error: 'Failed to delete property' });
+  }
 };
 
-export const getAllBookings = (req, res) => {
-    const enriched = bookings.map(b => ({
-        ...b,
-        propertyName: properties.find(p => p.id === b.propertyId)?.name || 'Unknown Property'
+export const getAllBookings = async (req, res) => {
+  try {
+    const adminId = req.user?.id;
+    if (!adminId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const cacheKey = `admin:bookings:${adminId}`;
+    const cached = await cacheGet(cacheKey);
+    if (cached) return res.json(cached);
+
+    const { data: hotels, error: hotelsError } = await supabase
+      .from('hotels')
+      .select('id')
+      .eq('owner_id', adminId);
+
+    if (hotelsError) throw hotelsError;
+
+    const hotelIds = hotels?.map(h => h.id) || [];
+
+    if (hotelIds.length === 0) {
+      await cacheSet(cacheKey, [], 300);
+      return res.json([]);
+    }
+
+    const { data: rooms, error: roomsError } = await supabase
+      .from('rooms')
+      .select('id')
+      .in('hotel_id', hotelIds);
+
+    if (roomsError) throw roomsError;
+
+    const roomIds = rooms?.map(r => r.id) || [];
+
+    if (roomIds.length === 0) {
+      await cacheSet(cacheKey, [], 300);
+      return res.json([]);
+    }
+
+    const { data: bookings, error: bookingsError } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        check_in,
+        check_out,
+        total_price,
+        status,
+        created_at,
+        room:rooms(room_type, hotel:hotels(name))
+      `)
+      .in('room_id', roomIds);
+
+    if (bookingsError) throw bookingsError;
+
+    const enrichedBookings = (bookings || []).map(b => ({
+      id: b.id,
+      propertyName: b.room?.hotel?.name || 'Unknown Property',
+      roomType: b.room?.room_type || 'Unknown Room',
+      checkIn: b.check_in,
+      checkOut: b.check_out,
+      amount: parseFloat(b.total_price),
+      status: b.status,
+      date: b.check_in
     }));
-    res.json(enriched);
+
+    await cacheSet(cacheKey, enrichedBookings, 300);
+    res.json(enrichedBookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Failed to fetch bookings' });
+  }
 };

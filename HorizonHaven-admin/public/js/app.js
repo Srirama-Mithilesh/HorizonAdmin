@@ -1,3 +1,4 @@
+import { apiCall } from './auth-helper.js';
 
 // --- APP LOGIC ---
 
@@ -5,7 +6,8 @@
 
 async function loadDashboardStats() {
     try {
-        const res = await fetch('/api/stats');
+        const res = await apiCall('/api/stats');
+        if (!res) return;
         const data = await res.json();
         
         const container = document.getElementById('stats-container');
@@ -25,20 +27,21 @@ async function loadDashboardStats() {
         `;
 
         // Load Recent Bookings
-        const booksRes = await fetch('/api/bookings');
+        const booksRes = await apiCall('/api/bookings');
+        if (!booksRes) return;
         const bookings = await booksRes.json();
         const tbody = document.getElementById('recent-bookings-list');
         
         tbody.innerHTML = bookings.slice(0, 5).map(b => `
             <tr>
                 <td>
-                    <div style="font-weight:700; color:#0F172A">${b.guest}</div>
+                    <div style="font-weight:700; color:#0F172A">${b.propertyName}</div>
                     <div style="font-size:0.75rem; color:#64748B">ID: ${b.id}</div>
                 </td>
-                <td>${b.propertyName}</td>
-                <td>${b.date}</td>
+                <td>${b.roomType}</td>
+                <td>${b.checkIn}</td>
                 <td style="font-family:monospace; font-weight:600">₹${b.amount.toLocaleString()}</td>
-                <td><span class="badge ${b.status === 'Confirmed' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
+                <td><span class="badge ${b.status === 'confirmed' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
             </tr>
         `).join('');
     } catch (e) {
@@ -48,7 +51,8 @@ async function loadDashboardStats() {
 
 async function loadProperties() {
     try {
-        const res = await fetch('/api/properties');
+        const res = await apiCall('/api/properties');
+        if (!res) return;
         const properties = await res.json();
         
         const container = document.getElementById('property-list');
@@ -116,7 +120,8 @@ async function loadProperties() {
 
 async function loadBookings() {
     try {
-        const res = await fetch('/api/bookings');
+        const res = await apiCall('/api/bookings');
+        if (!res) return;
         const bookings = await res.json();
         
         const tbody = document.getElementById('bookings-list');
@@ -124,12 +129,12 @@ async function loadBookings() {
             <tr>
                 <td>#${b.id}</td>
                 <td>
-                    <div style="font-weight:700; color:#0F172A">${b.guest}</div>
+                    <div style="font-weight:700; color:#0F172A">${b.propertyName}</div>
                 </td>
-                <td>${b.propertyName}</td>
-                <td>${b.date}</td>
+                <td>${b.roomType}</td>
+                <td>${b.checkIn}</td>
                 <td style="font-family:monospace; font-weight:600">₹${b.amount.toLocaleString()}</td>
-                <td><span class="badge ${b.status === 'Confirmed' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
+                <td><span class="badge ${b.status === 'confirmed' ? 'badge-success' : 'badge-warning'}">${b.status}</span></td>
             </tr>
         `).join('');
     } catch(e) { console.error(e); }
@@ -146,7 +151,8 @@ async function initForm() {
         document.getElementById('propId').value = id;
         
         try {
-            const res = await fetch(`/api/properties/${id}`);
+            const res = await apiCall(`/api/properties/${id}`);
+            if (!res) return;
             const data = await res.json();
             
             document.getElementById('name').value = data.name;
@@ -183,13 +189,14 @@ async function initForm() {
         jsonData.rooms = JSON.stringify(rooms);
 
         try {
-            await fetch('/api/properties', {
+            const res = await apiCall('/api/properties', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(jsonData)
             });
-            loadProperties();
-            switchToListView();
+            if (res && res.ok) {
+                loadProperties();
+                switchToListView();
+            }
         } catch(e) {
             alert("Error saving property");
         }
@@ -221,7 +228,9 @@ function addRoomField(data = { type: '', price: '', capacity: '' }) {
 
 async function deleteProperty(id) {
     if(confirm('Are you sure you want to remove this property?')) {
-        await fetch(`/api/properties/${id}`, { method: 'DELETE' });
-        loadProperties();
+        const res = await apiCall(`/api/properties/${id}`, { method: 'DELETE' });
+        if (res && res.ok) {
+            loadProperties();
+        }
     }
 }

@@ -1,4 +1,5 @@
 import express from 'express';
+import { authenticateToken } from '../middleware/auth.middleware.js';
 import {
     getStats,
     getAllProperties,
@@ -10,11 +11,11 @@ import {
 
 const router = express.Router();
 
-router.get('/stats', getStats);
-router.get('/properties', getAllProperties);
-router.get('/properties/:id', getPropertyById);
-router.post('/properties', createOrUpdateProperty);
-router.delete('/properties/:id', deleteProperty);
-router.get('/bookings', getAllBookings);
+router.get('/stats', authenticateToken, getStats);
+router.get('/properties', authenticateToken, getAllProperties);
+router.get('/properties/:id', authenticateToken, getPropertyById);
+router.post('/properties', authenticateToken, createOrUpdateProperty);
+router.delete('/properties/:id', authenticateToken, deleteProperty);
+router.get('/bookings', authenticateToken, getAllBookings);
 
 export default router;
